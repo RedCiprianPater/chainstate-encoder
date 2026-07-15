@@ -1,0 +1,62 @@
+# ─────────────────────────────────────────────────────────────
+# Render Blueprint · chainstate-priors
+# ─────────────────────────────────────────────────────────────
+# Deploys two things:
+#   1. A tiny web service exposing /run for manual triggers
+#   2. A daily cron job that runs the ingest at 03:00 UTC
+#
+# Both share the same repo/code — only the start command differs.
+# ─────────────────────────────────────────────────────────────
+services:
+  - type: web
+    name: chainstate-priors
+    runtime: python
+    plan: starter  # $7/mo · plenty for a low-traffic HTTP endpoint
+    region: frankfurt
+    branch: main
+    autoDeploy: true
+    healthCheckPath: /health
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.10"
+      - key: ENCODER_URL
+        value: https://chainstate-encoder.onrender.com
+      # These are secrets — set via Render UI, NOT in this file
+      - key: CLOUDFLARE_ACCOUNT_ID
+        sync: false
+      - key: CLOUDFLARE_KV_NAMESPACE_ID
+        sync: false
+      - key: CLOUDFLARE_API_TOKEN
+        sync: false
+      - key: ENCODER_API_KEY
+        sync: false
+      - key: RUN_TOKEN
+        sync: false
+
+# Cron job — daily 03:00 UTC. Separate service, same code.
+# Render Free plan doesn't support cron; needs at least Starter.
+crons:
+  - type: cron
+    name: chainstate-priors-nightly
+    runtime: python
+    plan: starter
+    region: frankfurt
+    branch: main
+    schedule: "0 3 * * *"  # 03:00 UTC every day
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    command: python cron_run.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.10"
+      - key: ENCODER_URL
+        value: https://chainstate-encoder.onrender.com
+      - key: CLOUDFLARE_ACCOUNT_ID
+        sync: false
+      - key: CLOUDFLARE_KV_NAMESPACE_ID
+        sync: false
+      - key: CLOUDFLARE_API_TOKEN
+        sync: false
+      - key: ENCODER_API_KEY
+        sync: false

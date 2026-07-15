@@ -1,0 +1,10 @@
+# ─────────────────────────────────────────────────────────────
+# chainstate-priors · requirements · LOCKED VERSIONS
+# ─────────────────────────────────────────────────────────────
+# Lightweight — no torch, no transformers. All embedding work is
+# delegated to the chainstate-encoder service via HTTP.
+# ─────────────────────────────────────────────────────────────
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+pydantic==2.9.2
+httpx==0.27.2
