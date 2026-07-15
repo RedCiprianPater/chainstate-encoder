@@ -1,10 +1,20 @@
 # ─────────────────────────────────────────────────────────────
-# chainstate-priors · requirements · LOCKED VERSIONS
+# chainstate-encoder · requirements · LOCKED VERSIONS
 # ─────────────────────────────────────────────────────────────
-# Lightweight — no torch, no transformers. All embedding work is
-# delegated to the chainstate-encoder service via HTTP.
+# sentence-transformers pulls torch (~800 MB). Render's Starter plan
+# has enough disk for this. Free tier does NOT — use Starter or above.
+#
+# torch is pinned to a CPU-only wheel to avoid pulling CUDA (~2 GB extra).
+# See --extra-index-url below.
 # ─────────────────────────────────────────────────────────────
 fastapi==0.115.6
 uvicorn[standard]==0.32.1
 pydantic==2.9.2
-httpx==0.27.2
+sentence-transformers==3.3.1
+transformers==4.46.3
+tokenizers==0.20.3
+huggingface_hub==0.26.5
+numpy==1.26.4
+# CPU-only torch — much smaller than the default CUDA build
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.4.1+cpu
